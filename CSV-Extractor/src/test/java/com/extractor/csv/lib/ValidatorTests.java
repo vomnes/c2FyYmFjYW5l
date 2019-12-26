@@ -25,8 +25,14 @@ public class ValidatorTests {
 
     @Test
     public void testIsPhoneNumber() {
-        Assertions.assertTrue(m.isPhoneNumber("02989999999"));
-        Assertions.assertFalse(m.isPhoneNumber("029807abcd"));
-        Assertions.assertFalse(m.isPhoneNumber("abc"));
+        Assertions.assertTrue(m.isPhoneNumberFR("0299999999"));
+        Assertions.assertTrue(m.isPhoneNumberFR("0699999999"));
+        Assertions.assertTrue(m.isPhoneNumberFR("06 99 99 99 99"));
+        Assertions.assertTrue(m.isPhoneNumberFR("06  99  99  99  99"));
+        Assertions.assertTrue(m.isPhoneNumberFR("06.99.99.99.99"));
+        Assertions.assertTrue(m.isPhoneNumberFR("+33699999999"));
+        Assertions.assertFalse(m.isPhoneNumberFR("+3369999999945"));
+        Assertions.assertFalse(m.isPhoneNumberFR("029807abcd"));
+        Assertions.assertFalse(m.isPhoneNumberFR("abc"));
     }
 }

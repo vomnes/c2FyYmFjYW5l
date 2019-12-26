@@ -15,8 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ExtractController {
   @RequestMapping(value = "/csv", method = RequestMethod.POST, produces = "text/csv")
   @ResponseBody
-  public ResponseEntity<String> downloadFile(
-    @RequestParam("file") MultipartFile file) {
+  public ResponseEntity<String> downloadFile(@RequestParam("file") MultipartFile file) {
     // Check file type
     if (!file.getContentType().equals("text/csv")) {
       return new ResponseEntity<String>("Error: Not a CSV type file - " + file.getContentType(), HttpStatus.BAD_REQUEST);
