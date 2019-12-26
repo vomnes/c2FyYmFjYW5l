@@ -15,7 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 public class ExtractController {
-  @RequestMapping(value = "/csv", method = RequestMethod.POST)
+
+  @RequestMapping(value = "/uploadCSV", method = RequestMethod.POST)
   @ResponseBody
   public ResponseEntity<?> downloadFile(@RequestParam(value = "file", required = false) MultipartFile file) {
     // Manage the error if no files are uploaded | Not possible to use ExceptionHandler for MultipartFile
@@ -38,6 +39,6 @@ public class ExtractController {
     } catch (IOException e) {
       return new ResponseHTTP().WithError("An error has occured", HttpStatus.INTERNAL_SERVER_ERROR);
     }
-    return new ResponseEntity<String>(HttpStatus.OK);
+    return new ResponseHTTP().Empty(HttpStatus.CREATED);
   }
 }

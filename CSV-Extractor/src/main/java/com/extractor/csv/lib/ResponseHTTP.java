@@ -16,4 +16,12 @@ public class ResponseHTTP {
         jsonResponse.put("Error", message);
         return new ResponseEntity<>(jsonResponse.toString(), headers, status);
     }
+
+    public ResponseEntity<Object> Empty(HttpStatus status) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-XSS-Protection", "1; mode=block");
+        headers.add("X-Content-Type-Options", "nosniff");
+        headers.add("X-Frame-Options", "DENY");
+        return new ResponseEntity<>(headers, status);
+    }
 }

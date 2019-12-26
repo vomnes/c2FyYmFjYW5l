@@ -3,6 +3,7 @@ package com.extractor.csv;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+import com.extractor.csv.lib.Array;
 import com.extractor.csv.lib.Validator;
 import com.extractor.csv.model.TemporaryField;
 
@@ -13,18 +14,20 @@ public class CSV {
     private BufferedReader reader;
     private String fieldDelimiter = null;
     private String[] fieldsName = null;
+    private Boolean noFieldNameAvailable = false;
     private Validator validator = new Validator();
     private Boolean hasEmailOrPhoneNumber;
+    private Array array = new Array();
 
     private TemporaryField tmpField = new TemporaryField();
     private JSONArray csvDataFormated;
-
 
     public CSV(java.io.Reader in) {
         this.reader = new BufferedReader(in);
         this.tmpField.clear();
         this.csvDataFormated = new JSONArray();
         this.hasEmailOrPhoneNumber = false;
+        this.noFieldNameAvailable = false;
     }
 
     public String getNextLine() throws IOException {
@@ -32,27 +35,37 @@ public class CSV {
         line = reader.readLine();
         String[] fields;
 
-        if (this.fieldDelimiter == null) {
-            this.fieldDelimiter = this.getDelimiter(line);
-        }
+        // Check if file is empty or fully read
         if (line == null) {
             this.reader.close();
             return null;
         }
+        // Get delimiter type
+        if (this.fieldDelimiter == null) {
+            this.fieldDelimiter = this.getDelimiter(line);
+        }
+        // Store fields
         if (this.fieldDelimiter == null) {
             fields = new String[]{ line };
         } else {
             fields = line.split(this.fieldDelimiter);
         }
-        if (this.fieldsName == null) {
-            this.fieldsName = fields;
+        // Manage fieldsName or format data line
+        if (this.fieldsName == null && !this.noFieldNameAvailable) {
+            if (array.Contains(fields, new String[]{"Email", "N° de mobile"})) {
+                this.fieldsName = fields;
+            } else {
+                // Handle if the first line doesn't contains any field name
+                this.noFieldNameAvailable = true;
+                this.csvDataFormated.put(this.formatLineToJSON(fields));
+            }
         } else {
-            this.csvDataFormated.put(this.formatLines(fields));
+            this.csvDataFormated.put(this.formatLineToJSON(fields));
         }
         return line;
      }
 
-     private JSONObject formatLines(String[] array) {
+     private JSONObject formatLineToJSON(String[] array) {
         JSONObject obj = new JSONObject();
 
         for (int i = 0; i < array.length; i++) {
@@ -80,15 +93,16 @@ public class CSV {
         } else if (validator.isPhoneNumberFR(value)) {
             tmpField.setName("phoneNumber");
             this.hasEmailOrPhoneNumber = true;
-        } else if (index < fieldsNameArray.length) { // Field name from Index is available in fields name array
+        } else if (fieldsNameArray != null && index < fieldsNameArray.length) { // Field name from Index is available in fields name array
             tmpField.setName(fieldsNameArray[index]);
             // Check if field name is 'email' but the content is not email type
             if (fieldsNameArray[index].toLowerCase().equals("email") && !validator.isEmail(value)) {
                 tmpField.clear(); // If not email type set the content to null to skip the field
                 return;
             }
-            // // Check if field name is 'n° de téléphone' but the content is not email type
-            // if (fieldsNameArray[index].toLowerCase() == "n° de mobile" &&!validator.isPhoneNumberFR(value)) {
+            // +++++ Done in other microservice
+            // // Check if field name is 'n° de téléphone' but the content is not a phone number type
+            // if (fieldsNameArray[index].toLowerCase().equals("n° de mobile") &&! validator.isPhoneNumberFR(value)) {
             //     tmpField.clear(); // If not email type set the content to null to skip the field
             //     return;
             // }
