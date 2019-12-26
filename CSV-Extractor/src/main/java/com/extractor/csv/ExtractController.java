@@ -31,10 +31,12 @@ public class ExtractController {
       CSV data = new CSV(in);
       while (data.getNextLine() != null);
       System.out.println("OK");
-    } catch (IllegalArgumentException e) {
-      return new ResponseHTTP().WithError("Invalid arguments", HttpStatus.NOT_ACCEPTABLE);
+      data.printCSVDataFormated();
+      if (!data.getHasEmailOrPhoneNumber()) {
+        return new ResponseHTTP().WithError("The CSV file must at least contains a valid 'email' or 'phone number'", HttpStatus.NOT_ACCEPTABLE);
+      }
     } catch (IOException e) {
-      return new ResponseHTTP().WithError("This is an error", HttpStatus.NOT_ACCEPTABLE);
+      return new ResponseHTTP().WithError("An error has occured", HttpStatus.INTERNAL_SERVER_ERROR);
     }
     return new ResponseEntity<String>(HttpStatus.OK);
   }
