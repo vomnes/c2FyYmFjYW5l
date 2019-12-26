@@ -22,4 +22,11 @@ public class ValidatorTests {
         Assertions.assertFalse(m.isEmail("testest.com"));
         Assertions.assertFalse(m.isEmail("testest"));
     }
+
+    @Test
+    public void testIsPhoneNumber() {
+        Assertions.assertTrue(m.isPhoneNumber("02989999999"));
+        Assertions.assertFalse(m.isPhoneNumber("029807abcd"));
+        Assertions.assertFalse(m.isPhoneNumber("abc"));
+    }
 }

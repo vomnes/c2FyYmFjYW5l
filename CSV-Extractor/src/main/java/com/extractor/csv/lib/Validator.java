@@ -5,4 +5,8 @@ public class Validator {
     public Boolean isEmail(String s) {
         return s.matches("(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)");
     }
+    // Return true if the parameter string is a valid phone number
+    public Boolean isPhoneNumber(String s) {
+        return s.matches("-?\\d+(\\.\\d+)?");
+    }
 }
