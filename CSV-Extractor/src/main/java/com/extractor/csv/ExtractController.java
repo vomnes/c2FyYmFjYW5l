@@ -1,5 +1,7 @@
 package com.extractor.csv;
 
+import com.extractor.csv.lib.ResponseHTTP;
+
 import java.io.IOException;
 
 import org.springframework.http.HttpStatus;
@@ -13,20 +15,29 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 public class ExtractController {
-  @RequestMapping(value = "/csv", method = RequestMethod.POST, produces = "text/csv")
+  // @ExceptionHandler(MissingServletRequestParameterException.class)
+  // public void handleMissingParams(MissingServletRequestParameterException ex) {
+  //     String name = ex.getParameterName();
+  //     System.out.println(name + " parameter is missing");
+  //     // Actual exception handling
+  // }
+
+  @RequestMapping(value = "/csv", method = RequestMethod.POST)
   @ResponseBody
-  public ResponseEntity<String> downloadFile(@RequestParam("file") MultipartFile file) {
+  public ResponseEntity<?> downloadFile(@RequestParam("file") MultipartFile file) {
     // Check file type
     if (!file.getContentType().equals("text/csv")) {
-      return new ResponseEntity<String>("Error: Not a CSV type file - " + file.getContentType(), HttpStatus.BAD_REQUEST);
+      return new ResponseHTTP().WithError("Not a CSV file type - " + file.getContentType(), HttpStatus.BAD_REQUEST);
     }
     try {
       java.io.Reader in = new java.io.InputStreamReader(file.getInputStream());
       CSV data = new CSV(in);
       while (data.getNextLine() != null);
       System.out.println("OK");
+    } catch (IllegalArgumentException e) {
+      return new ResponseHTTP().WithError("Invalid arguments", HttpStatus.NOT_ACCEPTABLE);
     } catch (IOException e) {
-      return new ResponseEntity<String>(HttpStatus.NOT_ACCEPTABLE);
+      return new ResponseHTTP().WithError("This is an error", HttpStatus.NOT_ACCEPTABLE);
     }
     return new ResponseEntity<String>(HttpStatus.OK);
   }
