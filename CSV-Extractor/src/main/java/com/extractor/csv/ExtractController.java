@@ -1,8 +1,8 @@
 package com.extractor.csv;
 
-import com.extractor.csv.lib.ResponseHTTP;
-
 import java.io.IOException;
+
+import com.extractor.csv.lib.ResponseHTTP;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,16 +15,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 public class ExtractController {
-  // @ExceptionHandler(MissingServletRequestParameterException.class)
-  // public void handleMissingParams(MissingServletRequestParameterException ex) {
-  //     String name = ex.getParameterName();
-  //     System.out.println(name + " parameter is missing");
-  //     // Actual exception handling
-  // }
-
   @RequestMapping(value = "/csv", method = RequestMethod.POST)
   @ResponseBody
-  public ResponseEntity<?> downloadFile(@RequestParam("file") MultipartFile file) {
+  public ResponseEntity<?> downloadFile(@RequestParam(value = "file", required = false) MultipartFile file) {
+    // Manage the error if no files are uploaded | Not possible to use ExceptionHandler for MultipartFile
+    if (file == null) {
+      return new ResponseHTTP().WithError("No CSV file selected", HttpStatus.BAD_REQUEST);
+    }
     // Check file type
     if (!file.getContentType().equals("text/csv")) {
       return new ResponseHTTP().WithError("Not a CSV file type - " + file.getContentType(), HttpStatus.BAD_REQUEST);

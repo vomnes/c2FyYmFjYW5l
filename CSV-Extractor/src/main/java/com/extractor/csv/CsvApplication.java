@@ -8,7 +8,7 @@ public class CsvApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(CsvApplication.class, args);
-		System.out.printf("Running");
+		System.out.printf("-----> Running\n");
 	}
 
 }
