@@ -12,5 +12,4 @@ class CsvApplicationTests {
   @Test
   public void contextLoads() {
   }
-
 }
