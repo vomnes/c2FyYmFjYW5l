@@ -29,7 +29,7 @@ type ContextData struct {
 // Return a http request with data in context
 func CreateRequest(method, url string, body []byte, ctxData ContextData) *http.Request {
 	r := httptest.NewRequest(method, url, bytes.NewBuffer(body))
-	var ctx context.Context
+	ctx := context.TODO()
 	if ctxData.MongoDB != nil {
 		ctx = context.WithValue(ctx, lib.MongoDB, ctxData.MongoDB)
 	}

@@ -1,6 +1,7 @@
 package route
 
 import (
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -8,6 +9,7 @@ import (
 	colTypes "../database/mongodb/collections"
 	"../lib"
 	"../lib/handleHTTP"
+	mgo "gopkg.in/mgo.v2"
 
 	"github.com/kylelemons/godebug/pretty"
 )
@@ -16,6 +18,13 @@ func AddContacts(w http.ResponseWriter, r *http.Request) {
 	var contactList []map[string]string
 	var contactToAdd colTypes.Contact
 	var contactListToInsert []colTypes.Contact
+
+	_, ok := r.Context().Value(lib.MongoDB).(*mgo.Database)
+	if !ok {
+		log.Println(lib.PrettyError("Register - Database Connection Failed"))
+		handleHTTP.RespondWithError(w, http.StatusInternalServerError, "Problem with database connection")
+		return
+	}
 
 	errorCode, errorContent, err := lib.ReaderJSONToInterface(r.Body, &contactList)
 	if err != nil {
