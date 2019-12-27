@@ -12,7 +12,7 @@ func ReaderJSONToInterface(reader io.Reader, data interface{}) (int, string, err
 	err := decoder.Decode(data)
 	if err != nil {
 		log.Println(PrettyError("Failed to decode json reader" + err.Error()))
-		return 406, "Failed to decode JSON reader", err
+		return 406, "Failed to decode JSON", err
 	}
 	return 0, "", nil
 }

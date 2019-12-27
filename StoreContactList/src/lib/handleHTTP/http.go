@@ -2,6 +2,7 @@ package handleHTTP
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"../../lib"
@@ -11,7 +12,7 @@ import (
 func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, err := json.Marshal(payload)
 	if err != nil {
-		lib.PrettyError(err.Error() + "Failed to marshal response")
+		log.Println(lib.PrettyError(err.Error() + "Failed to marshal response"))
 		response, _ = json.Marshal(map[string]interface{}{"error": "Failed to marshal response"})
 		code = 401
 	}
