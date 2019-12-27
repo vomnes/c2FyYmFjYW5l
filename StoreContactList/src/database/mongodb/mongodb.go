@@ -22,15 +22,15 @@ func MongoDBConn(dbName string) (*mgo.Session, string) {
 		host = "localhost"
 	}
 	if dbName == "" {
-		dbName = "db_hypertube_tests"
+		dbName = "sarbacanes_contacts_tests"
 	}
 	dbURL := "mongodb://" + host + ":" + port + "/" + dbName
 	session, err := mgo.Dial(dbURL)
 	if err != nil {
 		if err.Error() == "no reachable servers" {
-			return session, "Cannot connect to mongo: " + dbURL + " - " + err.Error()
+			return session, "Can'no't connect to mongodb: " + dbURL + " - " + err.Error()
 		} else {
-			log.Fatal(lib.PrettyError("Cannot connect to mongo: " + dbURL + " - " + err.Error()))
+			log.Fatal(lib.PrettyError("Can't connect to mongodb: " + dbURL + " - " + err.Error()))
 		}
 	}
 	return session, ""
