@@ -78,8 +78,8 @@ public class CSV {
         return obj;
      }
 
-     public void printCSVDataFormated() {
-         System.out.println(this.csvDataFormated.toString());
+     public JSONArray getCSVDataFormated() {
+         return this.csvDataFormated;
      }
 
      public Boolean getHasEmailOrPhoneNumber() {
