@@ -16,7 +16,8 @@ public class Array {
         List<String> list = Arrays.asList(array);
 
         for (String item : itemArray) {
-            return list.contains(item);
+            if (list.contains(item))
+                return true;
         }
         return false;
     }

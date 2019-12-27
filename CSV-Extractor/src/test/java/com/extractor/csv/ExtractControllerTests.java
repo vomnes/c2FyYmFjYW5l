@@ -14,7 +14,9 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -38,9 +40,12 @@ public class ExtractControllerTests {
 
     @Test
     public void ExtractControllerUploadCSV_ErrorNoFile() throws IOException {
-        String entity = this.restTemplate.
-        postForObject("http://localhost:" + port + "/uploadCSV", null, String.class);
-        assertThat(entity.toString()).contains("{\"Erraor\":\"No CSV file selected\"}");
+        ResponseEntity<String> response = this.restTemplate.
+        postForEntity("http://localhost:" + port + "/uploadCSV", null, String.class);
+        assertThat(response.getBody())
+            .contains("{\"Error\":\"No CSV file selected\"}");
+        assertThat(response.getStatusCode())
+            .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -53,15 +58,16 @@ public class ExtractControllerTests {
 
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<MultiValueMap<String, Object>>(body, headers);
 
-        assertThat(
-            this.restTemplate
-            .postForObject("http://localhost:" + port + "/uploadCSV", request, String.class)
-        )
-        .contains("{\"Error\":\"Not a CSV file type - application\\/pdf\"}");
+        ResponseEntity<String> response = this.restTemplate
+        .postForEntity("http://localhost:" + port + "/uploadCSV", request, String.class);
+        assertThat(response.getBody())
+            .contains("{\"Error\":\"Not a CSV file type - application\\/pdf\"}");
+        assertThat(response.getStatusCode())
+            .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
-    public void ExtractControllerUploadCSV_ErrorMustContainsAtLeastAValidEmailOrPhoneNumber() throws IOException {
+    public void ExtractControllerUploadCSV_ErrorMustContainsAtLeastAValidEmailOrPhoneNumber_InvalidEmail() throws IOException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
@@ -70,10 +76,117 @@ public class ExtractControllerTests {
 
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<MultiValueMap<String, Object>>(body, headers);
 
-        assertThat(
-            this.restTemplate
-            .postForObject("http://localhost:" + port + "/uploadCSV", request, String.class)
-        )
-        .contains("{\"Error\":\"The CSV file must at least contains a valid 'email' or 'phone number'\"}");
+        ResponseEntity<String> response = this.restTemplate
+        .postForEntity("http://localhost:" + port + "/uploadCSV", request, String.class);
+        assertThat(response.getBody())
+            .contains("{\"Error\":\"The CSV file must at least contains a valid 'email' or 'phone number'\"}");
+        assertThat(response.getStatusCode())
+            .isEqualTo(HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    @Test
+    public void ExtractControllerUploadCSV_ErrorMustContainsAtLeastAValidEmailOrPhoneNumber_InvalidPhoneNumber() throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", myFiles.CreateTmp("invalid-data.csv", "N° de mobile;Nom\nabcd;Valentin\n"));
+
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<MultiValueMap<String, Object>>(body, headers);
+
+        ResponseEntity<String> response = this.restTemplate
+        .postForEntity("http://localhost:" + port + "/uploadCSV", request, String.class);
+        assertThat(response.getBody())
+            .contains("{\"Error\":\"The CSV file must at least contains a valid 'email' or 'phone number'\"}");
+        assertThat(response.getStatusCode())
+            .isEqualTo(HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    @Test
+    public void ExtractControllerUploadCSV_ValidCSV_WithFieldsName() throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.add("Content-Test", "true");
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", myFiles.CreateTmp("valid-data-with-fields-name.csv", "Email;Nom\nv@v.co;Valentin\na@a.co;Hello"));
+
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<MultiValueMap<String, Object>>(body, headers);
+
+        ResponseEntity<String> response = this.restTemplate
+        .postForEntity("http://localhost:" + port + "/uploadCSV", request, String.class);
+        assertThat(response.getBody())
+            .contains("[{\"Nom\":\"Valentin\",\"email\":\"v@v.co\"},{\"Nom\":\"Hello\",\"email\":\"a@a.co\"}]");
+        assertThat(response.getStatusCode())
+            .isEqualTo(HttpStatus.CREATED);
+    }
+
+    @Test
+    public void ExtractControllerUploadCSV_ValidCSV_WithoutFieldsName() throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.add("Content-Test", "true");
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", myFiles.CreateTmp(
+            "valid-data-without-fields-name.csv",
+            "+33699999999;Valentin\n0288888888;Hello"
+            )
+        );
+
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<MultiValueMap<String, Object>>(body, headers);
+
+        ResponseEntity<String> response = this.restTemplate
+        .postForEntity("http://localhost:" + port + "/uploadCSV", request, String.class);
+        assertThat(response.getBody())
+            .contains("[{\"phoneNumber\":\"+33699999999\",\"col2\":\"Valentin\"},{\"phoneNumber\":\"0288888888\",\"col2\":\"Hello\"}]");
+        assertThat(response.getStatusCode())
+            .isEqualTo(HttpStatus.CREATED);
+    }
+
+    @Test
+    public void ExtractControllerUploadCSV_ValidCSV_WithFieldsName_Named() throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.add("Content-Test", "true");
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", myFiles.CreateTmp(
+            "valid-data-with-fields-name.csv",
+            "N° de mobile;Nom\n+33699999999;Valentin\n0288888888;Hello"
+            )
+        );
+
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<MultiValueMap<String, Object>>(body, headers);
+
+        ResponseEntity<String> response = this.restTemplate
+        .postForEntity("http://localhost:" + port + "/uploadCSV", request, String.class);
+        assertThat(response.getBody())
+            .contains("[{\"phoneNumber\":\"+33699999999\",\"Nom\":\"Valentin\"},{\"phoneNumber\":\"0288888888\",\"Nom\":\"Hello\"}]");
+        assertThat(response.getStatusCode())
+            .isEqualTo(HttpStatus.CREATED);
+    }
+
+    @Test
+    public void ExtractControllerUploadCSV_ValidCSV_WithFieldsName_SkipInvalidEmail() throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.add("Content-Test", "true");
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", myFiles.CreateTmp(
+            "valid-data-with-invalid-email.csv",
+            "Email;Nom\na.co;Valentin\ntest@test.fr;testName"
+            )
+        );
+
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<MultiValueMap<String, Object>>(body, headers);
+
+        ResponseEntity<String> response = this.restTemplate
+        .postForEntity("http://localhost:" + port + "/uploadCSV", request, String.class);
+        assertThat(response.getBody())
+            .contains("[{\"Nom\":\"Valentin\"},{\"Nom\":\"testName\",\"email\":\"test@test.fr\"}]");
+        assertThat(response.getStatusCode())
+            .isEqualTo(HttpStatus.CREATED);
     }
 }

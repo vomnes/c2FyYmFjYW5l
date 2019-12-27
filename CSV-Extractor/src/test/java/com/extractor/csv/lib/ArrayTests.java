@@ -30,6 +30,8 @@ public class ArrayTests {
         Assertions.assertTrue(m.Contains(items, new String[]{"a", "d"}));
         Assertions.assertFalse(m.Contains(items, new String[]{"z", "y"}));
         Assertions.assertTrue(m.Contains(items, new String[]{"d", "a"}));
+        Assertions.assertTrue(m.Contains(items, new String[]{"z", "a"}));
+        Assertions.assertTrue(m.Contains(items, new String[]{"a", "z"}));
         Assertions.assertFalse(m.Contains(items, new String[]{"z"}));
         Assertions.assertFalse(m.Contains(items, new String[]{""}));
     }
