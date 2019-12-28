@@ -93,12 +93,7 @@ func listExistingEmailPhoneNumber(emailList, phoneNumberList []string, db *mgo.D
 	// Reset emailList, phoneNumberList
 	var existingEmailList, existingPhoneNumberList []string
 	for _, existingContact := range existingContacts {
-		if existingContact.Email != "" {
-			existingEmailList = append(existingEmailList, existingContact.Email)
-		}
-		if existingContact.PhoneNumber != "" {
-			existingPhoneNumberList = append(existingPhoneNumberList, existingContact.PhoneNumber)
-		}
+		updateListEmailPhoneNumber(existingContact, &existingEmailList, &existingPhoneNumberList)
 	}
 	return existingEmailList, existingPhoneNumberList, nil
 }
@@ -190,6 +185,16 @@ func insertContactInDatabase(contactListToInsert []coltypes.Contact, existingEma
 			if err != nil {
 				log.Println(lib.PrettyError("Register - Contact Insertion Failed" + err.Error()))
 			}
+			updateListEmailPhoneNumber(contactToInsert, &existingEmailList, &existingPhoneNumberList)
 		}
+	}
+}
+
+func updateListEmailPhoneNumber(currentContact coltypes.Contact, emailList, phoneNumberList *[]string) {
+	if currentContact.Email != "" {
+		*emailList = append(*emailList, currentContact.Email)
+	}
+	if currentContact.PhoneNumber != "" {
+		*phoneNumberList = append(*phoneNumberList, currentContact.PhoneNumber)
 	}
 }

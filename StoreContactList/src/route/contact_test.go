@@ -120,6 +120,7 @@ func TestAddContactsWithOneContact(t *testing.T) {
 			"Nom":         "c1",
 			"email":       "test.test@a.com",
 		},
+		// Case: Phone Number already exists in database
 		map[string]interface{}{
 			"Prénom":      "a2",
 			"phoneNumber": "0600000001",
@@ -127,10 +128,27 @@ func TestAddContactsWithOneContact(t *testing.T) {
 			"Nom":         "c2",
 			"email":       "test.test@b.com",
 		},
+		// Case: No Email/PhoneNumber
 		map[string]interface{}{
 			"Prénom":   "a3",
 			"Civilité": "b3",
 			"Nom":      "c3",
+		},
+		// Case: Email or PhoneNumber Just Inserted
+		map[string]interface{}{
+			"Prénom":      "a4",
+			"phoneNumber": "+447911123456",
+			"Civilité":    "b4",
+			"Nom":         "c4",
+			"email":       "test.test@a.com",
+		},
+		// Case: Email already exists in database
+		map[string]interface{}{
+			"Prénom":      "a5",
+			"phoneNumber": "0600000005",
+			"Civilité":    "b5",
+			"Nom":         "c5",
+			"email":       "t@t.a",
 		},
 	})
 	if err != nil {
