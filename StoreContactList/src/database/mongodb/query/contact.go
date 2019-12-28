@@ -16,11 +16,12 @@ func FindContact(data bson.M, db *mgo.Database) (coltypes.Contact, error) {
 	return output.(coltypes.Contact), err
 }
 
-func FindContacts(data bson.M, db *mgo.Database) ([]coltypes.Contact, error) {
+func FindContacts(data, selectData bson.M, db *mgo.Database) ([]coltypes.Contact, error) {
 	var dataFound []coltypes.Contact
 	if err := db.
 		C("contacts").
 		Find(data).
+		Select(selectData).
 		All(&dataFound); err != nil {
 		return nil, err
 	}

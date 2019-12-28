@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 	defer dbsession.Close() // cleaning up
 	tests.MongoDB = dbsession.DB("sarbacanes_contacts_tests")
 	tests.DbClean()
+	tests.InitTimeTest()
 	ret := m.Run()
-	tests.DbClean()
 	os.Exit(ret)
 }

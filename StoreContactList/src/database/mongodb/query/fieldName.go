@@ -16,11 +16,12 @@ func FindFieldName(data bson.M, db *mgo.Database) (coltypes.FieldName, error) {
 	return output.(coltypes.FieldName), err
 }
 
-func FindFieldNames(data bson.M, db *mgo.Database) ([]coltypes.FieldName, error) {
+func FindFieldNames(data, selectData bson.M, db *mgo.Database) ([]coltypes.FieldName, error) {
 	var dataFound []coltypes.FieldName
 	if err := db.
 		C("fieldNames").
 		Find(data).
+		Select(selectData).
 		All(&dataFound); err != nil {
 		return nil, err
 	}
