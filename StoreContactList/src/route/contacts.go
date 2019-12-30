@@ -46,6 +46,11 @@ func AddContacts(w http.ResponseWriter, r *http.Request) {
 	}
 	// =================
 
+	if len(contactList) == 0 {
+		handleHTTP.RespondWithError(w, http.StatusNoContent, "No content to insert")
+		return
+	}
+
 	emailList, phoneNumberList, fieldNameList = listNewEmailPhoneNumberFieldName(contactList)
 	existingEmailList, existingPhoneNumberList, err := listExistingEmailPhoneNumber(emailList, phoneNumberList, db)
 	if err != nil {

@@ -50,6 +50,7 @@ func main() {
 
 	router := handleAPIRoutes()
 	enhancedRouter := enhanceHandlers(router, db)
+	fmt.Println("Server is running...")
 	if err := http.ListenAndServe(":"+*portPtr, enhancedRouter); err != nil {
 		log.Fatal(lib.PrettyError(err.Error()))
 	}

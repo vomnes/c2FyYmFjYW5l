@@ -25,6 +25,33 @@ func (a listInformationSorter) Less(i, j int) bool {
 	return strings.Compare(a[i].Value, a[j].Value) == -1
 }
 
+func TestAddContactsNoDatabase(t *testing.T) {
+	tests.DbClean()
+
+	context := tests.ContextData{}
+	body, err := lib.InterfaceToByte(map[string]interface{}{})
+	if err != nil {
+		t.Error(err)
+	}
+
+	r := tests.CreateRequest("POST", "/v1/contacts", body, context)
+	r.Header.Add("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	output := tests.CaptureOutput(func() {
+		AddContacts(w, r)
+	})
+	// Check : Content stardard output
+	if !strings.Contains(output, "Database Connection Failed") {
+		t.Error(output)
+	}
+	strError := tests.CompareResponseJSONCode(w, http.StatusInternalServerError, map[string]interface{}{
+		"error": "Problem with database connection",
+	})
+	if strError != nil {
+		t.Errorf("%v", strError)
+	}
+}
+
 func TestAddContactsInvalidJSONBody(t *testing.T) {
 	context := tests.ContextData{
 		MongoDB: tests.MongoDB,
@@ -54,11 +81,13 @@ func TestAddContactsInvalidJSONBody(t *testing.T) {
 	}
 }
 
-func TestAddContactsNoDatabase(t *testing.T) {
+func TestAddContactsNoData(t *testing.T) {
 	tests.DbClean()
 
-	context := tests.ContextData{}
-	body, err := lib.InterfaceToByte(map[string]interface{}{})
+	context := tests.ContextData{
+		MongoDB: tests.MongoDB,
+	}
+	body, err := lib.InterfaceToByte([]map[string]interface{}{})
 	if err != nil {
 		t.Error(err)
 	}
@@ -70,11 +99,11 @@ func TestAddContactsNoDatabase(t *testing.T) {
 		AddContacts(w, r)
 	})
 	// Check : Content stardard output
-	if !strings.Contains(output, "Database Connection Failed") {
+	if output != "" {
 		t.Error(output)
 	}
-	strError := tests.CompareResponseJSONCode(w, http.StatusInternalServerError, map[string]interface{}{
-		"error": "Problem with database connection",
+	strError := tests.CompareResponseJSONCode(w, http.StatusNoContent, map[string]interface{}{
+		"error": "No content to insert",
 	})
 	if strError != nil {
 		t.Errorf("%v", strError)
