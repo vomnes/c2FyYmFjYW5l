@@ -1,7 +1,7 @@
 version: '3'
 services:
   mongodb:
-    image: mongo
+    image: mongo:3.4.6
     container_name: "mongodb-sarbacanes-contact"
     ports:
       - "27017:27017"
