@@ -16,15 +16,6 @@ import (
 )
 
 // AddContacts is the route '/v1/contacts' with the method POST.
-// - Email cleared if invalid
-// - PhoneNumber must be a french nomber to be valid
-// - PhoneNumber are formated for insertion with +33
-// Not inserted if :
-// - Email or PhoneNumber exist already in the database
-// - Email & PhoneNumber are empty (or invalid for email)
-// - New contact doesn't contains an email or phoneNumber
-// If failed to insert contacts the list of those contact
-// is returned in the response JSON
 func AddContacts(w http.ResponseWriter, r *http.Request) {
 	var contactList []map[string]string
 	var contactListToInsert []coltypes.Contact

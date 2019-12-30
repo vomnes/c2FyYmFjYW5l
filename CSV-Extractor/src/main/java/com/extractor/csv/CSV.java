@@ -100,12 +100,11 @@ public class CSV {
                 tmpField.clear(); // If not email type set the content to null to skip the field
                 return;
             }
-            // +++++ Done in other microservice
-            // // Check if field name is 'n° de téléphone' but the content is not a phone number type
-            // if (fieldsNameArray[index].toLowerCase().equals("n° de mobile") &&! validator.isPhoneNumberFR(value)) {
-            //     tmpField.clear(); // If not email type set the content to null to skip the field
-            //     return;
-            // }
+            // Check if field name is 'n° de mobile' but the content is not a phone number type
+            if (fieldsNameArray[index].toLowerCase().equals("n° de mobile") &&! validator.isPhoneNumberFR(value)) {
+                tmpField.clear(); // If not email type set the content to null to skip the field
+                return;
+            }
         } else {
             // Create a new column if this line has more lines
             tmpField.setName("col" + Integer.toString(index + 1));
