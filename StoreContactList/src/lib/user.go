@@ -57,6 +57,16 @@ func IsValidEmailAddress(s string) bool {
 	return true
 }
 
+// IsValidPhoneNumberFR check if the string parameter is a valid french phone number
+// Return a boolean
+func IsValidPhoneNumberFR(s string) bool {
+	reEmail := regexp.MustCompile("^(?:(?:\\+|00)33|0)\\s*[1-9](?:[\\s.-]*\\d{2}){4}$")
+	if !reEmail.MatchString(s) {
+		return false
+	}
+	return true
+}
+
 // IsValidPassword check if the string parameter is a valid password
 // A valid password must have a minimum length of PasswordMinLength,
 // no white space at all, at least 1 digit OR 1 special char (@#$%^&+=)
@@ -180,7 +190,7 @@ func IsValidTag(s string) bool {
 	return true
 }
 
-// IsValidTag check if the string parameter is a valid IP Addres
+// IsValidIP4 check if the string parameter is a valid IP Addres
 // Return a boolean
 func IsValidIP4(ipAddress string) bool {
 	ipAddress = strings.Trim(ipAddress, " ")

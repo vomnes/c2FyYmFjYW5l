@@ -89,6 +89,27 @@ func TestIsValidEmailAddress(t *testing.T) {
 	}
 }
 
+var phoneNumberTests = []struct {
+	str         string // input
+	expected    bool   // expected result
+	testContent string // test details
+}{
+	{"+33 6 95 00 00 00", true, "Valid phone number - Space"},
+	{"0295000000", true, "No country code"},
+	{"+33695000000", true, "Valid phone number - No Space"},
+	{"+336950000000", false, "Phone number too long"},
+	{"+44695000000", false, "No +33"},
+}
+
+func TestIsValidPhoneNumberFR(t *testing.T) {
+	for _, tt := range phoneNumberTests {
+		actual := IsValidPhoneNumberFR(tt.str)
+		if actual != tt.expected {
+			t.Errorf("IsValidPhoneNumberFR(%s): expected %t, actual %t - Test type: \033[31m%s\033[0m", tt.str, tt.expected, actual, tt.testContent)
+		}
+	}
+}
+
 var passwordTests = []struct {
 	str         string // input
 	expected    bool   // expected result
@@ -177,15 +198,15 @@ var dateTests = []struct {
 	expected    bool   // expected result
 	testContent string // test details
 }{
-	{"06/03/1995", true, "Valid"},
-	{"6/03/1995", true, "Valid - Day"},
-	{"12/12/1995", true, "Invalid day"},
-	{"06/13/1995333", false, "Invalid length"},
-	{"06.12.1995", false, "Invalid characters '.'"},
-	{"06-12-1995", false, "Invalid characters '-'"},
+	{"07/03/1990", true, "Valid"},
+	{"6/03/1990", true, "Valid - Day"},
+	{"12/12/1990", true, "Invalid day"},
+	{"06/13/1990333", false, "Invalid length"},
+	{"06.12.1990", false, "Invalid characters '.'"},
+	{"06-12-1990", false, "Invalid characters '-'"},
 	{"06/03/199a", false, "Invalid characters 'a'"},
-	{"06/1995", false, "Invalid number of '/'"},
-	{"06/13/1995", false, "Invalid month"},
+	{"06/1990", false, "Invalid number of '/'"},
+	{"06/13/1990", false, "Invalid month"},
 	{"29/02/2017", false, "Limited to 28 days in February"},
 	{"31/04/2017", false, "Limited to 30 days in April"},
 	{"30/04/2017", true, "Limited to 30 days in April"},

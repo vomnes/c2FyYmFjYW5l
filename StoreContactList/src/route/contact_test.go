@@ -25,15 +25,6 @@ func (a listInformationSorter) Less(i, j int) bool {
 	return strings.Compare(a[i].Value, a[j].Value) == -1
 }
 
-// This aim of this sorter is to fix the random order
-type fieldNamesSorter []coltypes.FieldName
-
-func (a fieldNamesSorter) Len() int      { return len(a) }
-func (a fieldNamesSorter) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a fieldNamesSorter) Less(i, j int) bool {
-	return strings.Compare(a[i].CaptionName, a[j].CaptionName) == -1
-}
-
 func TestAddContactsInvalidJSONBody(t *testing.T) {
 	context := tests.ContextData{
 		MongoDB: tests.MongoDB,
@@ -115,7 +106,7 @@ func TestAddContactsWithOneContact(t *testing.T) {
 	body, err := lib.InterfaceToByte([]map[string]interface{}{
 		map[string]interface{}{
 			"Prénom":      "a1",
-			"phoneNumber": "+447911123456",
+			"phoneNumber": "+33791112345",
 			"Civilité":    "b1",
 			"Nom":         "c1",
 			"email":       "test.test@a.com",
@@ -123,10 +114,18 @@ func TestAddContactsWithOneContact(t *testing.T) {
 		// Case: Phone Number already exists in database
 		map[string]interface{}{
 			"Prénom":      "a2",
-			"phoneNumber": "0600000001",
+			"phoneNumber": "06 00 00 00 01",
 			"Civilité":    "b2",
 			"Nom":         "c2",
 			"email":       "test.test@b.com",
+		},
+		// Case: Email already exists in database
+		map[string]interface{}{
+			"Prénom":      "a5",
+			"phoneNumber": "0600000005",
+			"Civilité":    "b5",
+			"Nom":         "c5",
+			"email":       "t@t.a",
 		},
 		// Case: No Email/PhoneNumber
 		map[string]interface{}{
@@ -137,18 +136,20 @@ func TestAddContactsWithOneContact(t *testing.T) {
 		// Case: Email or PhoneNumber Just Inserted
 		map[string]interface{}{
 			"Prénom":      "a4",
-			"phoneNumber": "+447911123456",
+			"phoneNumber": "+33791112345",
 			"Civilité":    "b4",
 			"Nom":         "c4",
 			"email":       "test.test@a.com",
 		},
-		// Case: Email already exists in database
+		// Case: Invalid email address
 		map[string]interface{}{
-			"Prénom":      "a5",
-			"phoneNumber": "0600000005",
-			"Civilité":    "b5",
-			"Nom":         "c5",
-			"email":       "t@t.a",
+			"phoneNumber": "0600000006",
+			"email":       "t",
+		},
+		// Case: Invalid phone number
+		map[string]interface{}{
+			"phoneNumber": "+447911123456",
+			"email":       "t@t.z",
 		},
 	})
 	if err != nil {
@@ -186,7 +187,7 @@ func TestAddContactsWithOneContact(t *testing.T) {
 		coltypes.Contact{
 			ID:          "",
 			Email:       "test.test@a.com",
-			PhoneNumber: "+447911123456",
+			PhoneNumber: "+33791112345",
 			CreatedAt:   timeNow,
 			UpdatedAt:   nil,
 			Informations: []coltypes.InformationItem{
@@ -203,6 +204,20 @@ func TestAddContactsWithOneContact(t *testing.T) {
 					Value:       "c1",
 				},
 			},
+		},
+		coltypes.Contact{
+			ID:          "",
+			Email:       "",
+			PhoneNumber: "+33600000006",
+			CreatedAt:   timeNow,
+			UpdatedAt:   nil,
+		},
+		coltypes.Contact{
+			ID:          "",
+			Email:       "t@t.z",
+			PhoneNumber: "",
+			CreatedAt:   timeNow,
+			UpdatedAt:   nil,
 		},
 	}
 	var dbStateContacts []coltypes.Contact

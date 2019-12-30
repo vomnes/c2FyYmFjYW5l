@@ -16,6 +16,15 @@ import (
 )
 
 // AddContacts is the route '/v1/contacts' with the method POST.
+// - Email cleared if invalid
+// - PhoneNumber must be a french nomber to be valid
+// - PhoneNumber are formated for insertion with +33
+// Not inserted if :
+// - Email or PhoneNumber exist already in the database
+// - Email & PhoneNumber are empty (or invalid for email)
+// - New contact doesn't contains an email or phoneNumber
+// If failed to insert contacts the list of those contact
+// is returned in the response JSON
 func AddContacts(w http.ResponseWriter, r *http.Request) {
 	var contactList []map[string]string
 	var contactListToInsert []coltypes.Contact
@@ -24,28 +33,39 @@ func AddContacts(w http.ResponseWriter, r *http.Request) {
 
 	db, ok := r.Context().Value(lib.MongoDB).(*mgo.Database)
 	if !ok {
-		log.Println(lib.PrettyError("Register - Database Connection Failed"))
+		log.Println(lib.PrettyError("AddContacts - Database Connection Failed"))
 		handleHTTP.RespondWithError(w, http.StatusInternalServerError, "Problem with database connection")
 		return
 	}
 
+	// === READ BODY ===
 	errorCode, errorContent, err := lib.ReaderJSONToInterface(r.Body, &contactList)
 	if err != nil {
 		handleHTTP.RespondWithError(w, errorCode, errorContent)
 		return
 	}
+	// =================
 
 	emailList, phoneNumberList, fieldNameList = listNewEmailPhoneNumberFieldName(contactList)
 	existingEmailList, existingPhoneNumberList, err := listExistingEmailPhoneNumber(emailList, phoneNumberList, db)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
+		handleHTTP.RespondWithError(w, http.StatusServiceUnavailable, "Collect existing 'contacts' has failed")
+		return
 	}
 	existingFieldNames, err := listExistingFieldNames(fieldNameList, db)
 	if err != nil {
 		fmt.Println(err)
+		handleHTTP.RespondWithError(w, http.StatusServiceUnavailable, "Collect existing 'field names' has failed")
+		return
 	}
 	contactListToInsert = formatContactListToAdd(contactList, existingFieldNames, db)
-	insertContactInDatabase(contactListToInsert, existingEmailList, existingPhoneNumberList, db)
+	failedToInsertContacts := insertContactInDatabase(contactListToInsert, existingEmailList, existingPhoneNumberList, db)
+	if len(failedToInsertContacts) > 0 {
+		handleHTTP.RespondWithJSON(w, http.StatusCreated, map[string]interface{}{
+			"failedToInsertContacts": failedToInsertContacts,
+		})
+	}
 	handleHTTP.RespondEmpty(w, http.StatusCreated)
 }
 
@@ -56,9 +76,13 @@ func listNewEmailPhoneNumberFieldName(contactList []map[string]string) ([]string
 	for _, contact := range contactList {
 		for contactItemName, contactItemValue := range contact {
 			if contactItemName == "email" {
-				emailList = append(emailList, contactItemValue)
+				if lib.IsValidEmailAddress(contactItemValue) {
+					emailList = append(emailList, contactItemValue)
+				}
 			} else if contactItemName == "phoneNumber" {
-				phoneNumberList = append(phoneNumberList, handlePhoneNumber(contactItemValue))
+				if lib.IsValidPhoneNumberFR(contactItemValue) {
+					phoneNumberList = append(phoneNumberList, handlePhoneNumber(contactItemValue))
+				}
 			} else {
 				if !lib.StringInArray(contactItemName, fieldNameList) {
 					fieldNameList = append(fieldNameList, contactItemName)
@@ -88,7 +112,7 @@ func listExistingEmailPhoneNumber(emailList, phoneNumberList []string, db *mgo.D
 		db,
 	)
 	if err != nil {
-		return []string{}, []string{}, lib.PrettyError("Register - Find contacts has failed " + err.Error())
+		return []string{}, []string{}, lib.PrettyError("AddContacts - Find contacts has failed " + err.Error())
 	}
 	// Reset emailList, phoneNumberList
 	var existingEmailList, existingPhoneNumberList []string
@@ -107,7 +131,7 @@ func listExistingFieldNames(fieldNameList []string, db *mgo.Database) ([]coltype
 		db,
 	)
 	if err != nil {
-		return []coltypes.FieldName{}, lib.PrettyError("Register - Find Field Names has failed" + err.Error())
+		return []coltypes.FieldName{}, lib.PrettyError("AddContacts - Find Field Names has failed" + err.Error())
 	}
 	return existingFieldNames, nil
 }
@@ -126,8 +150,9 @@ func getOrCreateFieldName(fieldNames *[]coltypes.FieldName, captionName string, 
 		fieldNameCreated,
 		db)
 	if err != nil {
-		return "", err
+		return "", lib.PrettyError("AddContacts - Insert Field Names has failed" + err.Error())
 	}
+	// Update fieldNames array
 	*fieldNames = append(*fieldNames, fieldNameCreated)
 	return fieldNameCreated.ID, nil
 }
@@ -150,7 +175,7 @@ func formatContactListToAdd(contactList []map[string]string, existingFieldNames 
 		// Iter through contact items
 		for contactItemName, contactItemValue := range contact {
 			if contactItemName == "email" {
-				contactToAdd.Email = contactItemValue
+				contactToAdd.Email = handleEmailAdress(contactItemValue)
 			} else if contactItemName == "phoneNumber" {
 				contactToAdd.PhoneNumber = handlePhoneNumber(contactItemValue)
 			} else {
@@ -170,24 +195,40 @@ func formatContactListToAdd(contactList []map[string]string, existingFieldNames 
 }
 
 func handlePhoneNumber(phoneNumber string) string {
+	// Format phone number
+	phoneNumber = lib.RemoveCharacters(phoneNumber, " .-")
 	// Check if french phone number
 	if strings.HasPrefix(phoneNumber, "02") || strings.HasPrefix(phoneNumber, "06") {
 		return "+33" + strings.TrimPrefix(phoneNumber, "0")
 	}
-	return phoneNumber
+	if lib.IsValidPhoneNumberFR(phoneNumber) {
+		return phoneNumber
+	}
+	return ""
 }
 
-func insertContactInDatabase(contactListToInsert []coltypes.Contact, existingEmailList, existingPhoneNumberList []string, db *mgo.Database) {
+func handleEmailAdress(email string) string {
+	if lib.IsValidEmailAddress(email) {
+		return email
+	}
+	return ""
+}
+
+func insertContactInDatabase(contactListToInsert []coltypes.Contact, existingEmailList, existingPhoneNumberList []string, db *mgo.Database) []coltypes.Contact {
+	var failedToInsertList []coltypes.Contact
 	// Not possible to use the InsertMany from MongDB with mgo
 	for _, contactToInsert := range contactListToInsert {
 		if !lib.StringInArray(contactToInsert.Email, existingEmailList) && !lib.StringInArray(contactToInsert.PhoneNumber, existingPhoneNumberList) {
 			err := query.InsertContact(contactToInsert, db)
 			if err != nil {
-				log.Println(lib.PrettyError("Register - Contact Insertion Failed" + err.Error()))
+				log.Println(lib.PrettyError("AddContacts - Contact Insertion Failed" + err.Error()))
+				failedToInsertList = append(failedToInsertList, contactToInsert)
+				continue
 			}
 			updateListEmailPhoneNumber(contactToInsert, &existingEmailList, &existingPhoneNumberList)
 		}
 	}
+	return failedToInsertList
 }
 
 func updateListEmailPhoneNumber(currentContact coltypes.Contact, emailList, phoneNumberList *[]string) {

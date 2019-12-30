@@ -22,7 +22,7 @@ func handleAPIRoutes() *mux.Router {
 	api := mux.NewRouter()
 
 	api.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		handleHTTP.RespondWithJSON(w, 200, "OK")
+		handleHTTP.RespondWithJSON(w, http.StatusOK, "OK")
 	})
 	api.HandleFunc("/v1/contacts", route.AddContacts).Methods("POST")
 	return api
