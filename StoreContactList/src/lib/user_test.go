@@ -110,37 +110,6 @@ func TestIsValidPhoneNumberFR(t *testing.T) {
 	}
 }
 
-var passwordTests = []struct {
-	str         string // input
-	expected    bool   // expected result
-	testContent string // test details
-}{
-	{"abcABC123", true, "Valid password"},
-	{"abcABC@", true, "Valid password - @"},
-	{"abcABC#", true, "Valid password - #"},
-	{"abcABC$", true, "Valid password - $"},
-	{"abcABC%", true, "Valid password - %"},
-	{"abcABC^", true, "Valid password - ^"},
-	{"abcABC&", true, "Valid password - &"},
-	{"abcABC+", true, "Valid password - +"},
-	{"abcABC=", true, "Valid password - ="},
-	{"abcABC@42", true, "Valid password - @ + Digit"},
-	{"abcABC§", false, "Invalid password - §"},
-	{"abcABCDEF", false, "Only letters"},
-	{"abc", false, "Too short"},
-	{"     \t      ", false, "Only space"},
-	{"", false, "Empty"},
-}
-
-func TestIsValidPassword(t *testing.T) {
-	for _, tt := range passwordTests {
-		actual := IsValidPassword(tt.str)
-		if actual != tt.expected {
-			t.Errorf("IsValidPassword(%s): expected %t, actual %t - Test type: \033[31m%s\033[0m", tt.str, tt.expected, actual, tt.testContent)
-		}
-	}
-}
-
 var textTests = []struct {
 	str         string // input
 	length      int    // length max

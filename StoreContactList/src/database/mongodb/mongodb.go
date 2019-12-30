@@ -28,7 +28,7 @@ func MongoDBConn(dbName string) (*mgo.Session, string) {
 	session, err := mgo.Dial(dbURL)
 	if err != nil {
 		if err.Error() == "no reachable servers" {
-			return session, "Can'no't connect to mongodb: " + dbURL + " - " + err.Error()
+			return session, "Can't connect to mongodb: " + dbURL + " - " + err.Error()
 		} else {
 			log.Fatal(lib.PrettyError("Can't connect to mongodb: " + dbURL + " - " + err.Error()))
 		}

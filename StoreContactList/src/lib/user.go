@@ -5,9 +5,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode"
-
-	"golang.org/x/text/unicode/rangetable"
 )
 
 const (
@@ -62,30 +59,6 @@ func IsValidEmailAddress(s string) bool {
 func IsValidPhoneNumberFR(s string) bool {
 	reEmail := regexp.MustCompile("^(?:(?:\\+|00)33|0)\\s*[1-9](?:[\\s.-]*\\d{2}){4}$")
 	if !reEmail.MatchString(s) {
-		return false
-	}
-	return true
-}
-
-// IsValidPassword check if the string parameter is a valid password
-// A valid password must have a minimum length of PasswordMinLength,
-// no white space at all, at least 1 digit OR 1 special char (@#$%^&+=)
-// Return a boolean
-func IsValidPassword(s string) bool {
-	var hasDigit, hasSpecial bool
-	var specialChars = []*unicode.RangeTable{rangetable.New('@', '#', '$', '%', '^', '&', '+', '=')}
-	for _, s := range s {
-		if unicode.IsSpace(s) {
-			return false
-		}
-		if unicode.IsDigit(s) {
-			hasDigit = true
-		}
-		if unicode.IsOneOf(specialChars, s) {
-			hasSpecial = true
-		}
-	}
-	if len(s) < PasswordMinLength || (!hasDigit && !hasSpecial) {
 		return false
 	}
 	return true

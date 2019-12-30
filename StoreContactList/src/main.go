@@ -45,7 +45,7 @@ func main() {
 		if connectionError == "" {
 			break
 		}
-		fmt.Println(connectionError, ", go retry - MongoDB Connection")
+		fmt.Print(connectionError, ", go retry - MongoDB Connection\n")
 	}
 
 	router := handleAPIRoutes()

@@ -1,0 +1,38 @@
+version: '3'
+services:
+  mongodb:
+    image: mongo
+    container_name: "mongodb-sarbacanes-contact"
+    ports:
+      - "27017:27017"
+    volumes:
+      - "mongodata:/data/db"
+
+  service-1:
+    image: vomnes/csv-extractor-api
+    container_name: "csv-extractor"
+    build:
+      context: ./CSV-Extractor
+    tty: false
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+
+  service-2:
+    image: vomnes/store-contacts-api:latest
+    container_name: "manage-contacts"
+    build:
+      context: ./StoreContactList
+    tty: false
+    ports:
+      - "8081:8081"
+    environment:
+      - MONGO_DB_NAME=sarbacanes_contacts
+      - MONGO_DB_HOST=mongodb-sarbacanes-contact
+      - API_DOMAIN_NAME=http://localhost:8081
+    depends_on:
+      - service-1
+
+volumes:
+   mongodata:

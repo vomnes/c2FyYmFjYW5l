@@ -34,11 +34,11 @@ func withConnections(db *mgo.Session) adapter {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			dbsession := db.Copy()
 			defer dbsession.Close() // cleaning up
-			db_name := os.Getenv("MONGO_DB_NAME")
-			if db_name == "" {
-				db_name = "sarbacanes_contacts_tests"
+			dbName := os.Getenv("MONGO_DB_NAME")
+			if dbName == "" {
+				dbName = "sarbacanes_contacts_tests"
 			}
-			ctx := context.WithValue(r.Context(), lib.MongoDB, dbsession.DB(db_name))
+			ctx := context.WithValue(r.Context(), lib.MongoDB, dbsession.DB(dbName))
 			ctx = context.WithValue(ctx, lib.MongoDBSession, dbsession)
 			h.ServeHTTP(w, r.WithContext(ctx))
 		})

@@ -23,21 +23,15 @@ launch:
 run: build launch
 
 test:
-	@go test ./src/auth/.
-	@go test ./src/mail/.
-	@go test ./src/profile/.
-	@go test ./src/movie/.
-	@go test ./src/comment/.
+	@go test -v ./src/lib/.
+	@go test -v ./src/route/.
 
 test-d:
 	@go test ./src/$(TARGET)/.
 
 test-verbose:
-	@go test -v ./src/auth/.
-	@go test -v ./src/mail/.
-	@go test -v ./src/profile/.
-	@go test -v ./src/movie/.
-	@go test -v ./src/comment/.
+	@go test -v ./src/lib/.
+	@go test -v ./src/route/.
 
 test-target:
 	go test -v -run '$(TARGET)' ./src/...
