@@ -30,20 +30,13 @@ public class ExtractControllerTests {
     private TestRestTemplate restTemplate;
 
     private File myFiles = new File();
-    
-    // private ExtractController m;
-
-    // @BeforeEach
-    // void init() {
-    //     m = new ExtractController();
-    // }
 
     @Test
     public void ExtractControllerUploadCSV_ErrorNoFile() throws IOException {
         ResponseEntity<String> response = this.restTemplate.
         postForEntity("http://localhost:" + port + "/uploadCSV", null, String.class);
         assertThat(response.getBody())
-            .contains("{\"Error\":\"No CSV file selected\"}");
+            .contains("{\"error\":\"No CSV file selected\"}");
         assertThat(response.getStatusCode())
             .isEqualTo(HttpStatus.BAD_REQUEST);
     }
@@ -61,7 +54,7 @@ public class ExtractControllerTests {
         ResponseEntity<String> response = this.restTemplate
         .postForEntity("http://localhost:" + port + "/uploadCSV", request, String.class);
         assertThat(response.getBody())
-            .contains("{\"Error\":\"Not a CSV file type - application\\/pdf\"}");
+            .contains("{\"error\":\"Not a CSV file type - application\\/pdf\"}");
         assertThat(response.getStatusCode())
             .isEqualTo(HttpStatus.BAD_REQUEST);
     }
@@ -79,7 +72,7 @@ public class ExtractControllerTests {
         ResponseEntity<String> response = this.restTemplate
         .postForEntity("http://localhost:" + port + "/uploadCSV", request, String.class);
         assertThat(response.getBody())
-            .contains("{\"Error\":\"The CSV file must at least contains a valid 'email' or 'phone number'\"}");
+            .contains("{\"error\":\"The CSV file must at least contains a valid 'email' or 'phone number'\"}");
         assertThat(response.getStatusCode())
             .isEqualTo(HttpStatus.NOT_ACCEPTABLE);
     }
@@ -97,7 +90,7 @@ public class ExtractControllerTests {
         ResponseEntity<String> response = this.restTemplate
         .postForEntity("http://localhost:" + port + "/uploadCSV", request, String.class);
         assertThat(response.getBody())
-            .contains("{\"Error\":\"The CSV file must at least contains a valid 'email' or 'phone number'\"}");
+            .contains("{\"error\":\"The CSV file must at least contains a valid 'email' or 'phone number'\"}");
         assertThat(response.getStatusCode())
             .isEqualTo(HttpStatus.NOT_ACCEPTABLE);
     }

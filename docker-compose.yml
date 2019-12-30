@@ -7,6 +7,8 @@ services:
       - "27017:27017"
     volumes:
       - "mongodata:/data/db"
+    networks:
+      - myNetwork
 
   service-1:
     image: vomnes/csv-extractor-api
@@ -18,6 +20,8 @@ services:
       - "8080:8080"
     depends_on:
       - mongodb
+    networks:
+      - myNetwork
 
   service-2:
     image: vomnes/store-contacts-api:latest
@@ -31,8 +35,13 @@ services:
       - MONGO_DB_NAME=sarbacanes_contacts
       - MONGO_DB_HOST=mongodb-sarbacanes-contact
       - API_DOMAIN_NAME=http://localhost:8081
-    depends_on:
-      - service-1
+    networks:
+      - myNetwork
 
 volumes:
-   mongodata:
+  mongodata:
+
+# Allow containers to communicate together, otherwise each container has
+# his own IP address that may cause problems
+networks:
+  myNetwork:

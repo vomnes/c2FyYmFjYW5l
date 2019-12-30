@@ -78,7 +78,7 @@ public class CSV {
         return obj;
      }
 
-     public JSONArray getCSVDataFormated() {
+     public JSONArray getCSVDataJSON() {
          return this.csvDataFormated;
      }
 

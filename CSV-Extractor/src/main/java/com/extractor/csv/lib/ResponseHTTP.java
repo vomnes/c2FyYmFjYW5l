@@ -14,7 +14,7 @@ public class ResponseHTTP {
         headers.add("X-Frame-Options", "DENY");
         headers.add("Content-Type", "application/json");
         JSONObject jsonResponse = new JSONObject();
-        jsonResponse.put("Error", message);
+        jsonResponse.put("error", message);
         return new ResponseEntity<>(jsonResponse.toString(), headers, status);
     }
 
