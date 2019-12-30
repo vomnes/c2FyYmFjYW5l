@@ -15,8 +15,7 @@ or
 
 The name of the database in MongoDB *sarbacanes_contacts*.
 
-## Organisation
-### CSV Extractor
+## CSV Extractor
 This microservice is an API that use :
 - Java Spring
 - Junit 5 for the tests
@@ -29,7 +28,7 @@ Take as parameter in the 'form-data' body an item named 'file' that contains a f
 - This file must be a CSV type
 - The CSV delimiters handled are ";", ",", "\t", "|", "^"
 - The CSV file must at least contains a valid 'email' or 'phone number'
-- No field names are not necessary
+- Field names are not necessary
 
 Other details :
 - If a email address is found his value is stored in 'email'
@@ -38,26 +37,29 @@ Other details :
 - If an element in 'n° de mobile' row is found but his content is not an french phone number this data is cleared
 - Content that doesn't have a field name is affected to 'col{rowIndex}' field name
 
-The extracted data will be formatted in JSON and send to the route 'POST /v1/contacts' of the Manage Contacts microservice.
+The extracted data will be formatted in JSON and send to the route 'POST /v1/contacts' of the Manage Contacts microservice.  
 If you want to get the formatted JSON in the HTTP response (no connection with 'POST /v1/contacts') you just need to add in the request header "Content-Test: 'true'".
 
-### Manage Contacts
+## Manage Contacts
 This microservice is an API that use :
 - Golang
 - Unit testing with the Golang standard library
-- MongoDB for the database containing the collections `Contacts` and `FieldNames`
+- MongoDB (3.4.6) for the database containing the collections `Contacts` and `FieldNames`
 
 #### POST - /v1/contacts
 This route allows to store the contact list in the body in the mongodb database.
 
 ```
 JSON Body :
+[
   {
     "phoneNumber"   string,
     "email"         string,
     "xFieldName"    string,
     ...
   }
+  ...
+]
 ```
 
 Details :
