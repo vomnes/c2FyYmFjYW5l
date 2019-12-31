@@ -3,18 +3,16 @@
 ## Launch the service
 Docker is required.
 
-**Create the docker images:**
+**Create the docker images:**  
 `sh create-docker-images.sh`
 or
 `docker-compose build`
 
-**Build and run the docker containers:**
+**Build and run the docker containers:**  
 `sh run.sh`
 or
-`docker-compose up`
+`docker-compose up`  
 This command run the unit tests for each microservice and then launch it.
-
-The name of the database in MongoDB *sarbacanes_contacts*.
 
 ## CSV Extractor
 This microservice is an API that use :
@@ -24,7 +22,7 @@ This microservice is an API that use :
 #### POST - /uploadCSV
 This route allows to extract a contact list from a CSV.
 
-Take as parameter in the 'form-data' body an item named 'file' that contains a file with the contact list :
+Take as parameter in the **'form-data'** body an item named **'file'** that contains a file with the contact list :
 - A file must be selected
 - This file must be a CSV type
 - The CSV delimiters handled are ";" and ","
@@ -74,3 +72,33 @@ Not inserted if :
 If failed to insert contacts the list of those contact is returned in the response JSON
 
 Return HTTP Code 201 Status Created for success
+
+## Database - MongoDB
+The name of the database in MongoDB is *sarbacanes_contacts*.
+
+### Collections
+#### Contacts
+```
+{
+  "_id"           string,
+  "email"         string,
+  "phoneNumber"   string,
+  "createdat"     time,
+  "updatedat"     time,
+  "informations"  [
+    {
+      "fieldName_id": string,
+      "value":        string
+    }
+    ...
+  ]
+}
+```
+
+#### FieldNames
+```
+{
+  "_id":          string,
+  "captionName":  string
+}
+```
