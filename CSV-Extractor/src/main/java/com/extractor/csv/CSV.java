@@ -118,13 +118,12 @@ public class CSV {
          String[] delimiters = {
              ";",
              ",",
-             "\t",
-             "|",
-             "^",
          };
          for (String delimiter : delimiters) {
-             if (str.contains(delimiter))
+             if (str.contains(delimiter)) {
+                System.out.println(delimiter);
                 return delimiter;
+             }
          }
          return null;
      }

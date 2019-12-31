@@ -35,6 +35,8 @@ services:
       - MONGO_DB_NAME=sarbacanes_contacts
       - MONGO_DB_HOST=mongodb-sarbacanes-contact
       - API_DOMAIN_NAME=http://localhost:8081
+    depends_on:
+      - service-1
     networks:
       - myNetwork
 

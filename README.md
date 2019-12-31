@@ -12,6 +12,7 @@ or
 `sh run.sh`
 or
 `docker-compose up`
+This command run the unit tests for each microservice and then launch it.
 
 The name of the database in MongoDB *sarbacanes_contacts*.
 
@@ -26,7 +27,7 @@ This route allows to extract a contact list from a CSV.
 Take as parameter in the 'form-data' body an item named 'file' that contains a file with the contact list :
 - A file must be selected
 - This file must be a CSV type
-- The CSV delimiters handled are ";", ",", "\t", "|", "^"
+- The CSV delimiters handled are ";" and ","
 - The CSV file must at least contains a valid 'email' or 'phone number'
 - Field names are not necessary
 
@@ -38,7 +39,7 @@ Other details :
 - Content that doesn't have a field name is affected to 'col{rowIndex}' field name
 
 The extracted data will be formatted in JSON and send to the route 'POST /v1/contacts' of the Manage Contacts microservice.  
-If you want to get the formatted JSON in the HTTP response (no connection with 'POST /v1/contacts') you just need to add in the request header "Content-Test: 'true'".
+If you want to get the formatted JSON in the HTTP response (no connection with 'POST /v1/contacts') you just need to add in the request header `Content-Test: 'true'`.
 
 ## Manage Contacts
 This microservice is an API that use :
